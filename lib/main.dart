@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'routes/app_pages.dart';
+import 'routes/app_routes.dart';
+import 'package:get/get.dart';
 
 void
 main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(
     fileName: ".env",
   );
@@ -18,18 +22,14 @@ class MyApp
     super.key,
   });
 
-  // This widget is the root of your application.
   @override
   Widget build(
     BuildContext context,
   ) {
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        body: Text(
-          "${dotenv.env['API_SERVER_URL']}",
-        ),
-      ),
+      initialRoute: Routes.home,
+      getPages: AppPages.pages,
     );
   }
 }
