@@ -1,7 +1,8 @@
-import 'package:absensi_p6/routes/app_routes.dart';
 import 'package:flutter/material.dart';
+import 'package:absensi_p6/routes/app_routes.dart';
 import 'package:get/get.dart';
-import '../view_models/movie_controller.dart';
+import 'package:absensi_p6/view_models/movie_controller.dart';
+import 'package:absensi_p6/view_models/theme_controller.dart';
 
 class MovieView
     extends
@@ -9,6 +10,8 @@ class MovieView
           MovieController
         > {
   final TextEditingController searchController = TextEditingController();
+
+  final ThemeController themeController = Get.find();
 
   MovieView({
     super.key,
@@ -23,6 +26,34 @@ class MovieView
         title: Text(
           "Movie Database",
         ),
+        actions: [
+          Obx(
+            () => IconButton(
+              icon: AnimatedSwitcher(
+                duration: Duration(
+                  milliseconds: 300,
+                ),
+                transitionBuilder:
+                    (
+                      child,
+                      animation,
+                    ) => RotationTransition(
+                      turns: animation,
+                      child: child,
+                    ),
+                child: Icon(
+                  themeController.isDarkMode.value
+                      ? Icons.dark_mode
+                      : Icons.light_mode,
+                  key: ValueKey(
+                    themeController.isDarkMode.value,
+                  ),
+                ),
+              ),
+              onPressed: themeController.toggleTheme,
+            ),
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(
@@ -57,6 +88,10 @@ class MovieView
                   horizontal: 16,
                   vertical: 0,
                 ),
+                filled: true,
+                fillColor: Theme.of(
+                  context,
+                ).cardColor,
               ),
               onSubmitted:
                   (
@@ -108,97 +143,111 @@ class MovieView
                         ) {
                           final movie = controller.movieList[index];
 
-                          return GestureDetector(
-                            onTap: () {
-                              // Navigasi ke Detail
-                              Get.toNamed(
-                                Routes.detail,
-                                arguments: movie.imdbID,
-                              );
-                            },
-                            child: Card(
-                              elevation: 4,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                  12,
+                          return TweenAnimationBuilder(
+                            tween: Tween(
+                              begin: 0.0,
+                              end: 1.0,
+                            ),
+                            duration: Duration(
+                              milliseconds:
+                                  400 +
+                                  (index *
+                                      50),
+                            ),
+                            curve: Curves.easeOut,
+                            builder:
+                                (
+                                  context,
+                                  value,
+                                  child,
+                                ) {
+                                  return Transform.translate(
+                                    offset: Offset(
+                                      0,
+                                      50 *
+                                          (1 -
+                                              value),
+                                    ),
+                                    child: Opacity(
+                                      opacity: value,
+                                      child: child,
+                                    ),
+                                  );
+                                },
+                            child: GestureDetector(
+                              onTap: () {
+                                // Navigasi ke Detail
+                                Get.toNamed(
+                                  Routes.detail,
+                                  arguments: movie.imdbID,
+                                );
+                              },
+                              child: Card(
+                                elevation: 4,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    12,
+                                  ),
                                 ),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  // 1. Bagian Gambar (Expanded agar mengisi sisa ruang atas)
-                                  Expanded(
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.vertical(
-                                        top: Radius.circular(
-                                          12,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
+                                    // 1. Bagian Gambar (Expanded agar mengisi sisa ruang atas)
+                                    Expanded(
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.vertical(
+                                          top: Radius.circular(
+                                            12,
+                                          ),
                                         ),
-                                      ),
-                                      child: Image.network(
-                                        movie.poster,
-                                        fit: BoxFit.cover, // Gambar full memenuhi area
-                                        errorBuilder:
-                                            (
-                                              ctx,
-                                              error,
-                                              stack,
-                                            ) => Container(
-                                              color: Colors.grey[300],
-                                              child: Center(
-                                                child: Icon(
+                                        child: Hero(
+                                          tag: movie.imdbID,
+                                          child: Image.network(
+                                            movie.poster,
+                                            fit: BoxFit.cover, // Gambar full memenuhi area
+                                            errorBuilder:
+                                                (
+                                                  context,
+                                                  error,
+                                                  stackTrace,
+                                                ) => Icon(
                                                   Icons.broken_image,
-                                                  color: Colors.grey,
                                                 ),
-                                              ),
-                                            ),
-                                        loadingBuilder:
-                                            (
-                                              ctx,
-                                              child,
-                                              progress,
-                                            ) {
-                                              if (progress ==
-                                                  null)
-                                                return child;
-                                              return Center(
-                                                child: CircularProgressIndicator(),
-                                              );
-                                            },
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                  ),
 
-                                  // 2. Bagian Teks (Judul & Tahun)
-                                  Padding(
-                                    padding: const EdgeInsets.all(
-                                      8.0,
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          movie.title,
-                                          maxLines: 2, // Maksimal 2 baris
-                                          overflow: TextOverflow.ellipsis, // ... jika kepanjangan
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 14,
+                                    // 2. Bagian Teks (Judul & Tahun)
+                                    Padding(
+                                      padding: const EdgeInsets.all(
+                                        8.0,
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            movie.title,
+                                            maxLines: 2, // Maksimal 2 baris
+                                            overflow: TextOverflow.ellipsis, // ... jika kepanjangan
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.titleSmall,
                                           ),
-                                        ),
-                                        SizedBox(
-                                          height: 4,
-                                        ),
-                                        Text(
-                                          movie.year,
-                                          style: TextStyle(
-                                            color: Colors.grey[600],
-                                            fontSize: 12,
+                                          SizedBox(
+                                            height: 4,
                                           ),
-                                        ),
-                                      ],
+                                          Text(
+                                            movie.year,
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.bodySmall,
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           );

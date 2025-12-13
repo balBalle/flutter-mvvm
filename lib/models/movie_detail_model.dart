@@ -7,6 +7,7 @@ class MovieDetail {
   final String plot;
   final String director;
   final String genre;
+  final String imdbID;
 
   MovieDetail({
     required this.title,
@@ -15,6 +16,7 @@ class MovieDetail {
     required this.plot,
     required this.director,
     required this.genre,
+    required this.imdbID,
   });
 
   factory MovieDetail.fromJson(
@@ -37,7 +39,8 @@ class MovieDetail {
               json['Poster'] !=
                   'N/A')
           ? json['Poster']
-          : dotenv.env['DUMMY_POSTER_URL'],
+          : dotenv.env['DUMMY_POSTER_URL'] ??
+                '',
       plot:
           json['Plot'] ??
           'Deskripsi tidak tersedia',
@@ -47,6 +50,9 @@ class MovieDetail {
       genre:
           json['Genre'] ??
           'N/A',
+      imdbID:
+          json['imdbID'] ??
+          '',
     );
   }
 }
